@@ -53,12 +53,19 @@ export const googleLogin = async (req, res) => {
 };
 
  
-export const register = async (req, res, next) => {
+export const register = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password } = req.body || {};
 
-    const userExists = await User.findOne({ email });
-    if (userExists) {
+    if (!username || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "username, email and password are required",
+      });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
       return res.status(400).json({
         success: false,
         message: "User already exists",
@@ -71,9 +78,9 @@ export const register = async (req, res, next) => {
       password,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
-      token: generateToken(user._id),
+      message: "User registered successfully",
       user: {
         id: user._id,
         username: user.username,
@@ -81,9 +88,15 @@ export const register = async (req, res, next) => {
       },
     });
   } catch (error) {
-    next(error);
+    console.error("REGISTER ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
+
 
 
 export const login = async (req, res, next) => {

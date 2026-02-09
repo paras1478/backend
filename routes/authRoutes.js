@@ -14,7 +14,7 @@ import protect from "../middleware/auth.js";
 
 const router = express.Router();
 
-
+// validation handler
 const validate = (req, res, next) => {
   const errors = validationResult(req);
 
@@ -29,50 +29,37 @@ const validate = (req, res, next) => {
   next();
 };
 
-
+// register validation
 const registerValidation = [
   body("username")
     .trim()
-    .notEmpty()
-    .withMessage("username is required")
-    .isLength({ min: 3 })
-    .withMessage("username must be at least 3 characters"),
+    .notEmpty().withMessage("username is required")
+    .isLength({ min: 3 }).withMessage("username must be at least 3 characters"),
 
   body("email")
-    .notEmpty()
-    .withMessage("email is required")
-    .isEmail()
-    .withMessage("please provide a valid email"),
+    .notEmpty().withMessage("email is required")
+    .isEmail().withMessage("please provide a valid email"),
 
   body("password")
-    .notEmpty()
-    .withMessage("password is required")
-    .isLength({ min: 6 })
-    .withMessage("password must be at least 6 characters"),
+    .notEmpty().withMessage("password is required")
+    .isLength({ min: 6 }).withMessage("password must be at least 6 characters"),
 ];
 
-
+// login validation
 const loginValidation = [
   body("email")
-    .notEmpty()
-    .withMessage("email is required")
-    .isEmail()
-    .withMessage("please provide a valid email"),
+    .notEmpty().withMessage("email is required")
+    .isEmail().withMessage("please provide a valid email"),
 
   body("password")
-    .notEmpty()
-    .withMessage("password is required")
-    .isLength({ min: 6 })
-    .withMessage("password must be at least 6 characters"),
+    .notEmpty().withMessage("password is required")
+    .isLength({ min: 6 }).withMessage("password must be at least 6 characters"),
 ];
 
-
-
+// routes
 router.post("/register", registerValidation, validate, register);
 router.post("/login", loginValidation, validate, login);
 router.post("/google", googleLogin);
-
-
 
 router.get("/profile", protect, getProfile);
 router.put("/profile", protect, updateProfile);
