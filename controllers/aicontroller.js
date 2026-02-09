@@ -3,7 +3,7 @@ dotenv.config();
 
 import { GoogleGenAI } from "@google/genai";
 
-import Document from "../models/Document.js";
+import Document from "../models/document.js";
 import ChatHistory from "../models/ChatHistory.js";
 import Quiz from "../models/Quiz.js";
 import Flashcard from "../models/Flashcard.js";
