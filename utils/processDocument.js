@@ -1,7 +1,7 @@
 import fs from "fs";
 import { extractTextFromPDF } from "../utils/pdfParser.js";
 
-import Document from "../models/Document.js";
+import Document from "../models/document.js";
 
 export const processDocument = async (documentId, filePath) => {
   try {
