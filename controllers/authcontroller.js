@@ -5,18 +5,23 @@ import { OAuth2Client } from "google-auth-library";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE || "7d",
   });
-  
 };
-
-
 
 
 export const googleLogin = async (req, res) => {
   try {
+    if (!req.body || !req.body.idToken) {
+      return res.status(400).json({
+        success: false,
+        message: "idToken is required",
+      });
+    }
+
     const { idToken } = req.body;
 
     const ticket = await client.verifyIdToken({
@@ -31,31 +36,41 @@ export const googleLogin = async (req, res) => {
 
     if (!user) {
       user = await User.create({
-        username: email.split("@")[0], 
+        username: email.split("@")[0],
         email,
         googleId: sub,
         authProvider: "google",
       });
     }
 
-   const token = jwt.sign(
-  { id: user._id },
-  process.env.JWT_SECRET,
-  { expiresIn: "7d" }
-);
-
-    res.status(200).json({ token, user });
-
+    return res.status(200).json({
+      success: true,
+      token: generateToken(user._id),
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+      },
+    });
   } catch (error) {
     console.error("Google login error:", error);
-    res.status(401).json({ message: "Google authentication failed" });
+    return res.status(401).json({
+      success: false,
+      message: "Google authentication failed",
+    });
   }
 };
 
- 
 export const register = async (req, res) => {
   try {
-    const { username, email, password } = req.body || {};
+    if (!req.body) {
+      return res.status(400).json({
+        success: false,
+        message: "Request body missing",
+      });
+    }
+
+    const { username, email, password } = req.body;
 
     if (!username || !email || !password) {
       return res.status(400).json({
@@ -86,10 +101,10 @@ export const register = async (req, res) => {
         username: user.username,
         email: user.email,
       },
+      token: generateToken(user._id),
     });
   } catch (error) {
     console.error("REGISTER ERROR:", error);
-
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -97,11 +112,23 @@ export const register = async (req, res) => {
   }
 };
 
-
-
-export const login = async (req, res, next) => {
+export const login = async (req, res) => {
   try {
+    if (!req.body) {
+      return res.status(400).json({
+        success: false,
+        message: "Request body missing",
+      });
+    }
+
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "email and password are required",
+      });
+    }
 
     const user = await User.findOne({ email }).select("+password");
 
@@ -112,7 +139,7 @@ export const login = async (req, res, next) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       token: generateToken(user._id),
       user: {
@@ -122,63 +149,54 @@ export const login = async (req, res, next) => {
       },
     });
   } catch (error) {
-    next(error);
+    console.error("LOGIN ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 
 
-export const getProfile = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.user.id);
-
-    res.status(200).json({
-      success: true,
-      user,
-    });
-  } catch (error) {
-    next(error);
-  }
+export const getProfile = async (req, res) => {
+  const user = await User.findById(req.user.id);
+  return res.status(200).json({ success: true, user });
 };
 
+export const updateProfile = async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.user.id,
+    req.body,
+    { new: true, runValidators: true }
+  );
 
-export const updateProfile = async (req, res, next) => {
-  try {
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-
-    res.status(200).json({
-      success: true,
-      user,
-    });
-  } catch (error) {
-    next(error);
-  }
+  return res.status(200).json({ success: true, user });
 };
 
-export const changePassword = async (req, res, next) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
+export const changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body || {};
 
-    const user = await User.findById(req.user.id).select("+password");
-
-    if (!(await user.matchPassword(currentPassword))) {
-      return res.status(401).json({
-        success: false,
-        message: "Current password is incorrect",
-      });
-    }
-
-    user.password = newPassword;
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Password changed successfully",
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "currentPassword and newPassword are required",
     });
-  } catch (error) {
-    next(error);
   }
+
+  const user = await User.findById(req.user.id).select("+password");
+
+  if (!(await user.matchPassword(currentPassword))) {
+    return res.status(401).json({
+      success: false,
+      message: "Current password is incorrect",
+    });
+  }
+
+  user.password = newPassword;
+  await user.save();
+
+  return res.status(200).json({
+    success: true,
+    message: "Password changed successfully",
+  });
 };

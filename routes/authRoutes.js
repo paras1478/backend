@@ -14,7 +14,6 @@ import protect from "../middleware/auth.js";
 
 const router = express.Router();
 
-// validation handler
 const validate = (req, res, next) => {
   const errors = validationResult(req);
 
@@ -29,7 +28,6 @@ const validate = (req, res, next) => {
   next();
 };
 
-// register validation
 const registerValidation = [
   body("username")
     .trim()
@@ -45,7 +43,6 @@ const registerValidation = [
     .isLength({ min: 6 }).withMessage("password must be at least 6 characters"),
 ];
 
-// login validation
 const loginValidation = [
   body("email")
     .notEmpty().withMessage("email is required")
@@ -56,7 +53,6 @@ const loginValidation = [
     .isLength({ min: 6 }).withMessage("password must be at least 6 characters"),
 ];
 
-// routes
 router.post("/register", registerValidation, validate, register);
 router.post("/login", loginValidation, validate, login);
 router.post("/google", googleLogin);
