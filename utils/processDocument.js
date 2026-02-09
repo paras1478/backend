@@ -1,5 +1,4 @@
 import fs from "fs";
-import { extractTextFromPDF } from "../utils/pdfParser.js";
 
 import Document from "../models/document.js";
 
