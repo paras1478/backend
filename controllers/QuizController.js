@@ -30,11 +30,7 @@ export const createQuiz = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get all quizzes for a document
- * @route   GET /api/quizzes/:documentId
- * @access  Private
- */
+
 export const getQuizzes = async (req, res) => {
   try {
     if (!req.user) {
@@ -66,11 +62,7 @@ export const getQuizzes = async (req, res) => {
 };
 
 
-/**
- * @desc    Get single quiz by ID
- * @route   GET /api/quizzes/quiz/:id
- * @access  Private
- */
+
 
 export const getQuizById = async (req, res) => {
   try {
@@ -105,11 +97,7 @@ export const getQuizById = async (req, res) => {
 
 
 
-/**
- * @desc    Submit quiz answers
- * @route   POST /api/quizzes/:id/submit
- * @access  Private
- */
+
 export const submitQuiz = async (req, res) => {
   try {
     const { answers } = req.body;
@@ -180,16 +168,6 @@ export const submitQuiz = async (req, res) => {
 
 
 
-
-
-
-
-
-/**
- * @desc    Get quiz results
- * @route   GET /api/quizzes/:id/results
- * @access  Private
- */
 export const getQuizResults = async (req, res) => {
   try {
     const quiz = await Quiz.findOne({
@@ -224,11 +202,7 @@ export const getQuizResults = async (req, res) => {
  
 
 
-/**
- * @desc    Delete a quiz
- * @route   DELETE /api/quizzes/:id
- * @access  Private
- */
+
 export const deleteQuiz = async (req, res) => {
   try {
     const quiz = await Quiz.findOneAndDelete({
