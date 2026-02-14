@@ -47,12 +47,13 @@ app.get("/ping", (req, res) => {
 });
 
 
-app.use("/auth", authRoutes);
-app.use("/documents", documentRoutes);
-app.use("/flashcards", flashcardRoutes);
-app.use("/ai", aiRoutes);
-app.use("/quizzes", quizRoutes);
-app.use("/progress", progressRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/documents", documentRoutes);
+app.use("/api/flashcards", flashcardRoutes);
+app.use("/api/ai", aiRoutes);
+app.use("/api/quizzes", quizRoutes);
+app.use("/api/progress", progressRoutes);
+
 
 
 
